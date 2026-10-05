@@ -1,0 +1,18 @@
+[
+    {
+        "server_id": "94c88757-6121-48fc-bad4-98256b05cc70",
+        "status": "healthy"
+    },
+    {
+        "server_id": "7a358459-c95c-44d5-bab2-087773bd94e3",
+        "status": "healthy"
+    },
+    {
+        "server_id": "61d4351f-3e57-451b-952a-38cc68386af8",
+        "status": "healthy"
+    },
+    {
+        "server_id": "71d72782-c376-4c51-8baf-2ef160cdcff4",
+        "status": "healthy"
+    }
+] 

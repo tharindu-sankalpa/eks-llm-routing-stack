@@ -1,0 +1,150 @@
+{
+    "id": "1",
+    "jsonrpc": "2.0",
+    "result": {
+        "task": {
+            "id": "85de6173-0e32-4ea3-ab04-cf51ad99c6d7",
+            "contextId": "82ebae42-0fbc-4fec-ba56-a5f643ccecf2",
+            "status": {
+                "state": "TASK_STATE_COMPLETED",
+                "timestamp": "2026-10-05T16:37:46.226640Z"
+            },
+            "artifacts": [
+                {
+                    "artifactId": "b608ef55-227a-49c1-8845-3674aafdbe89",
+                    "parts": [
+                        {
+                            "text": "The cluster has **2 nodes**, both Ready, running Kubernetes **v1.34.11-eks-3b4a6ca** (Amazon Linux 2023, containerd 2.2.7).\n\n| Node | Status | Version |\n|---|---|---|\n| ip-192-168-66-111.ap-south-1.compute.internal | Ready | v1.34.11-eks-3b4a6ca |\n| ip-192-168-99-129.ap-south-1.compute.internal | Ready | v1.34.11-eks-3b4a6ca |"
+                        }
+                    ]
+                }
+            ],
+            "history": [
+                {
+                    "messageId": "m-0002",
+                    "contextId": "82ebae42-0fbc-4fec-ba56-a5f643ccecf2",
+                    "taskId": "85de6173-0e32-4ea3-ab04-cf51ad99c6d7",
+                    "role": "ROLE_USER",
+                    "parts": [
+                        {
+                            "text": "How many nodes does this cluster have, and which Kubernetes version do they run?"
+                        }
+                    ]
+                },
+                {
+                    "messageId": "m-0002",
+                    "contextId": "82ebae42-0fbc-4fec-ba56-a5f643ccecf2",
+                    "taskId": "85de6173-0e32-4ea3-ab04-cf51ad99c6d7",
+                    "role": "ROLE_USER",
+                    "parts": [
+                        {
+                            "text": "How many nodes does this cluster have, and which Kubernetes version do they run?"
+                        }
+                    ]
+                },
+                {
+                    "messageId": "27cc6bb6-2e37-46b6-bcef-848af9516cec",
+                    "role": "ROLE_AGENT",
+                    "parts": [
+                        {
+                            "text": "I'll check the cluster nodes.\n\n"
+                        },
+                        {
+                            "data": {
+                                "args": {
+                                    "output": "wide",
+                                    "resource_type": "nodes"
+                                },
+                                "id": "chatcmpl-tool-bc5374f8181fa8df",
+                                "name": "kagent_tools-k8s_get_resources"
+                            },
+                            "metadata": {
+                                "kagent_type": "function_call"
+                            }
+                        }
+                    ],
+                    "metadata": {
+                        "kagent_user_id": "admin@kagent.dev",
+                        "kagent_session_id": "82ebae42-0fbc-4fec-ba56-a5f643ccecf2",
+                        "kagent_author": "cluster_agent",
+                        "kagent_usage_metadata": {
+                            "candidatesTokenCount": 70.0,
+                            "promptTokenCount": 1746.0,
+                            "totalTokenCount": 1816.0
+                        },
+                        "kagent_invocation_id": "e-b9fb1c81-b58f-4a86-bd02-4ae60a923796",
+                        "kagent_app_name": "kagent__NS__cluster_agent",
+                        "kagent_adk_partial": null
+                    }
+                },
+                {
+                    "messageId": "67aa1aa3-da3c-4d13-9e4c-a4b178999c87",
+                    "role": "ROLE_AGENT",
+                    "parts": [
+                        {
+                            "data": {
+                                "id": "chatcmpl-tool-bc5374f8181fa8df",
+                                "response": {
+                                    "content": [
+                                        {
+                                            "text": "NAME                                            STATUS   ROLES    AGE     VERSION                INTERNAL-IP      EXTERNAL-IP   OS-IMAGE                        KERNEL-VERSION                     CONTAINER-RUNTIME\nip-192-168-66-111.ap-south-1.compute.internal   Ready    <none>   3h47m   v1.34.11-eks-3b4a6ca   192.168.66.111   <none>        Amazon Linux 2023.12.20260928   6.12.110-135.201.amzn2023.x86_64   containerd://2.2.7+unknown\nip-192-168-99-129.ap-south-1.compute.internal   Ready    <none>   3h47m   v1.34.11-eks-3b4a6ca   192.168.99.129   <none>        Amazon Linux 2023.12.20260928   6.12.110-135.201.amzn2023.x86_64   containerd://2.2.7+unknown\n",
+                                            "type": "text"
+                                        }
+                                    ],
+                                    "isError": false
+                                },
+                                "name": "kagent_tools-k8s_get_resources"
+                            },
+                            "metadata": {
+                                "kagent_type": "function_response"
+                            }
+                        }
+                    ],
+                    "metadata": {
+                        "kagent_user_id": "admin@kagent.dev",
+                        "kagent_session_id": "82ebae42-0fbc-4fec-ba56-a5f643ccecf2",
+                        "kagent_invocation_id": "e-b9fb1c81-b58f-4a86-bd02-4ae60a923796",
+                        "kagent_author": "cluster_agent",
+                        "kagent_app_name": "kagent__NS__cluster_agent",
+                        "kagent_adk_partial": null
+                    }
+                },
+                {
+                    "messageId": "0306e16d-7b7d-4523-81c3-4b4bd2b632f7",
+                    "role": "ROLE_AGENT",
+                    "parts": [
+                        {
+                            "text": "The cluster has **2 nodes**, both Ready, running Kubernetes **v1.34.11-eks-3b4a6ca** (Amazon Linux 2023, containerd 2.2.7).\n\n| Node | Status | Version |\n|---|---|---|\n| ip-192-168-66-111.ap-south-1.compute.internal | Ready | v1.34.11-eks-3b4a6ca |\n| ip-192-168-99-129.ap-south-1.compute.internal | Ready | v1.34.11-eks-3b4a6ca |"
+                        }
+                    ],
+                    "metadata": {
+                        "kagent_user_id": "admin@kagent.dev",
+                        "kagent_session_id": "82ebae42-0fbc-4fec-ba56-a5f643ccecf2",
+                        "kagent_author": "cluster_agent",
+                        "kagent_usage_metadata": {
+                            "candidatesTokenCount": 131.0,
+                            "promptTokenCount": 2064.0,
+                            "totalTokenCount": 2195.0
+                        },
+                        "kagent_invocation_id": "e-b9fb1c81-b58f-4a86-bd02-4ae60a923796",
+                        "kagent_app_name": "kagent__NS__cluster_agent",
+                        "kagent_adk_partial": null
+                    }
+                }
+            ],
+            "metadata": {
+                "kagent_user_id": "admin@kagent.dev",
+                "kagent_session_id": "82ebae42-0fbc-4fec-ba56-a5f643ccecf2",
+                "kagent_author": "cluster_agent",
+                "kagent_usage_metadata": {
+                    "candidatesTokenCount": 131.0,
+                    "promptTokenCount": 2064.0,
+                    "totalTokenCount": 2195.0
+                },
+                "kagent_invocation_id": "e-b9fb1c81-b58f-4a86-bd02-4ae60a923796",
+                "kagent_adk_partial": null,
+                "kagent_app_name": "kagent__NS__cluster_agent"
+            }
+        }
+    }
+}

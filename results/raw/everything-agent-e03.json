@@ -1,0 +1,83 @@
+{
+    "id": "1",
+    "jsonrpc": "2.0",
+    "result": {
+        "task": {
+            "id": "6b10e9d5-a182-4642-951f-5663adc12d08",
+            "contextId": "2a8d1978-894f-42b2-b9a2-dc85f9c42934",
+            "status": {
+                "state": "TASK_STATE_COMPLETED",
+                "timestamp": "2026-10-05T16:42:37.816730Z"
+            },
+            "artifacts": [
+                {
+                    "artifactId": "daa32371-4738-4837-b2ad-e6487c29e69a",
+                    "parts": [
+                        {
+                            "text": "No available tool can report how many nodes this Kubernetes cluster has."
+                        }
+                    ]
+                }
+            ],
+            "history": [
+                {
+                    "messageId": "e03",
+                    "contextId": "2a8d1978-894f-42b2-b9a2-dc85f9c42934",
+                    "taskId": "6b10e9d5-a182-4642-951f-5663adc12d08",
+                    "role": "ROLE_USER",
+                    "parts": [
+                        {
+                            "text": "How many nodes does this Kubernetes cluster have?"
+                        }
+                    ]
+                },
+                {
+                    "messageId": "e03",
+                    "contextId": "2a8d1978-894f-42b2-b9a2-dc85f9c42934",
+                    "taskId": "6b10e9d5-a182-4642-951f-5663adc12d08",
+                    "role": "ROLE_USER",
+                    "parts": [
+                        {
+                            "text": "How many nodes does this Kubernetes cluster have?"
+                        }
+                    ]
+                },
+                {
+                    "messageId": "9bf73d62-c8ad-4309-a536-7dd90bae1773",
+                    "role": "ROLE_AGENT",
+                    "parts": [
+                        {
+                            "text": "No available tool can report how many nodes this Kubernetes cluster has."
+                        }
+                    ],
+                    "metadata": {
+                        "kagent_user_id": "admin@kagent.dev",
+                        "kagent_session_id": "2a8d1978-894f-42b2-b9a2-dc85f9c42934",
+                        "kagent_author": "everything_agent",
+                        "kagent_usage_metadata": {
+                            "candidatesTokenCount": 100.0,
+                            "promptTokenCount": 1956.0,
+                            "totalTokenCount": 2056.0
+                        },
+                        "kagent_invocation_id": "e-a9c6b9ef-8c84-4279-a1d6-d5744cf3dc91",
+                        "kagent_app_name": "kagent__NS__everything_agent",
+                        "kagent_adk_partial": null
+                    }
+                }
+            ],
+            "metadata": {
+                "kagent_user_id": "admin@kagent.dev",
+                "kagent_session_id": "2a8d1978-894f-42b2-b9a2-dc85f9c42934",
+                "kagent_author": "everything_agent",
+                "kagent_usage_metadata": {
+                    "candidatesTokenCount": 100.0,
+                    "promptTokenCount": 1956.0,
+                    "totalTokenCount": 2056.0
+                },
+                "kagent_invocation_id": "e-a9c6b9ef-8c84-4279-a1d6-d5744cf3dc91",
+                "kagent_adk_partial": null,
+                "kagent_app_name": "kagent__NS__everything_agent"
+            }
+        }
+    }
+}

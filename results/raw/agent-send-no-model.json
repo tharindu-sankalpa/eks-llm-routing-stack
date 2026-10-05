@@ -1,0 +1,71 @@
+{
+    "id": "1",
+    "jsonrpc": "2.0",
+    "result": {
+        "task": {
+            "id": "c621f093-ea30-45c6-bedb-2e982487e81f",
+            "contextId": "48bb4737-4266-49ab-95d2-a9446c05160b",
+            "status": {
+                "state": "TASK_STATE_FAILED",
+                "message": {
+                    "messageId": "43f1fe65-20f1-4612-aca8-5ae1c522abc6",
+                    "role": "ROLE_AGENT",
+                    "parts": [
+                        {
+                            "text": "Error code: 400 - {'error': {'message': '/chat/completions: Invalid model name passed in model=gpt-5.6-sol. Call `/v1/models` to view available models for your key.', 'type': 'invalid_request_error', 'param': None, 'code': '400', 'provider_specific_fields': {'error': '/chat/completions: Invalid model name passed in model=gpt-5.6-sol. Call `/v1/models` to view available models for your key.'}}}"
+                        }
+                    ],
+                    "metadata": {
+                        "kagent_error_code": "API_ERROR"
+                    }
+                },
+                "timestamp": "2026-10-05T13:15:56.576923Z"
+            },
+            "history": [
+                {
+                    "messageId": "m-0001",
+                    "contextId": "48bb4737-4266-49ab-95d2-a9446c05160b",
+                    "taskId": "c621f093-ea30-45c6-bedb-2e982487e81f",
+                    "role": "ROLE_USER",
+                    "parts": [
+                        {
+                            "text": "How many nodes does this cluster have?"
+                        }
+                    ]
+                },
+                {
+                    "messageId": "m-0001",
+                    "contextId": "48bb4737-4266-49ab-95d2-a9446c05160b",
+                    "taskId": "c621f093-ea30-45c6-bedb-2e982487e81f",
+                    "role": "ROLE_USER",
+                    "parts": [
+                        {
+                            "text": "How many nodes does this cluster have?"
+                        }
+                    ]
+                },
+                {
+                    "messageId": "43f1fe65-20f1-4612-aca8-5ae1c522abc6",
+                    "role": "ROLE_AGENT",
+                    "parts": [
+                        {
+                            "text": "Error code: 400 - {'error': {'message': '/chat/completions: Invalid model name passed in model=gpt-5.6-sol. Call `/v1/models` to view available models for your key.', 'type': 'invalid_request_error', 'param': None, 'code': '400', 'provider_specific_fields': {'error': '/chat/completions: Invalid model name passed in model=gpt-5.6-sol. Call `/v1/models` to view available models for your key.'}}}"
+                        }
+                    ],
+                    "metadata": {
+                        "kagent_error_code": "API_ERROR"
+                    }
+                }
+            ],
+            "metadata": {
+                "kagent_app_name": "kagent__NS__cluster_agent",
+                "kagent_user_id": "admin@kagent.dev",
+                "kagent_author": "cluster_agent",
+                "kagent_session_id": "48bb4737-4266-49ab-95d2-a9446c05160b",
+                "kagent_invocation_id": "e-1fc0ddba-dc6f-4799-b5c9-773b7bdeaf74",
+                "kagent_error_code": "API_ERROR",
+                "kagent_adk_partial": null
+            }
+        }
+    }
+}

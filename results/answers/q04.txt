@@ -1,0 +1,18 @@
+Q: Which MCPServer and RemoteMCPServer resources exist in the kagent namespace, and what URL does each RemoteMCPServer point to?
+State: TASK_STATE_COMPLETED (6s)
+
+**MCPServer** (kagent namespace)
+
+| Name | Ready | Age |
+|---|---|---|
+| everything | True | 3h39m |
+
+**RemoteMCPServer** (kagent namespace)
+
+| Name | Protocol | URL | Accepted |
+|---|---|---|---|
+| kagent-tool-server | STREAMABLE_HTTP | http://kagent-tools.kagent:8084/mcp | True |
+| litellm-mcp-everything | STREAMABLE_HTTP | http://litellm.litellm.svc.cluster.local:4000/mcp/ | True |
+| litellm-mcp-gateway | STREAMABLE_HTTP | http://litellm.litellm.svc.cluster.local:4000/mcp/ | True |
+
+Note: both litellm RemoteMCPServers point to the same URL.

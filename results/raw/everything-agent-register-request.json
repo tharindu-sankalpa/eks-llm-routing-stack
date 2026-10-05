@@ -1,0 +1,34 @@
+{
+  "agent_name": "everything_agent",
+  "agent_card_params": {
+    "protocolVersion": "1.0",
+    "name": "everything_agent",
+    "description": "Demo agent that uses the MCP reference test server deployed by kmcp.",
+    "url": "http://kagent-controller.kagent.svc.cluster.local:8083/api/a2a/kagent/everything-agent/",
+    "version": "1.0.0",
+    "defaultInputModes": [
+      "text"
+    ],
+    "defaultOutputModes": [
+      "text"
+    ],
+    "capabilities": {
+      "streaming": true
+    },
+    "skills": [
+      {
+        "description": "Echoes text and adds numbers using the MCP reference test server.",
+        "examples": [
+          "Add 1234.5 and 8765.5.",
+          "Echo the text: hello from kmcp."
+        ],
+        "id": "mcp-demo",
+        "name": "MCP demo tools",
+        "tags": [
+          "mcp",
+          "demo"
+        ]
+      }
+    ]
+  }
+}

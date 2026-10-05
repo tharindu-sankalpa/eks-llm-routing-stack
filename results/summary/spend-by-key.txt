@@ -1,0 +1,18 @@
+key alias: kagent   rows: 280
+  acompletion	openrouter/deepseek/deepseek-v4.1-flash	calls=24	spend_usd=0.011390310799999998	tokens=69758
+  acompletion	unknown-model	calls=2	spend_usd=0	tokens=0
+  call_mcp_tool	MCP: kagent_tools-helm_list_releases	calls=1	spend_usd=0.0	tokens=0
+  call_mcp_tool	MCP: kagent_tools-k8s_describe_resource	calls=1	spend_usd=0.0	tokens=0
+  call_mcp_tool	MCP: kagent_tools-k8s_get_cluster_configuration	calls=2	spend_usd=0	tokens=0
+  call_mcp_tool	MCP: kagent_tools-k8s_get_events	calls=3	spend_usd=0	tokens=0
+  call_mcp_tool	MCP: kagent_tools-k8s_get_resources	calls=11	spend_usd=0	tokens=0
+  list_mcp_tools	MCP: list_tools	calls=234	spend_usd=0	tokens=0
+  responses	openai/gpt-5.6-sol	calls=2	spend_usd=0	tokens=713
+
+key alias: kagent-everything-agent   rows: 13
+  acompletion	openrouter/deepseek/deepseek-v4.1-flash	calls=1	spend_usd=0.0	tokens=0
+  acompletion	openrouter/x-ai/grok-4.7	calls=5	spend_usd=0.010780000000000001	tokens=10198
+  call_mcp_tool	MCP: kmcp_everything-echo	calls=1	spend_usd=0.0	tokens=0
+  call_mcp_tool	MCP: kmcp_everything-get-sum	calls=1	spend_usd=0.0	tokens=0
+  list_mcp_tools	MCP: list_tools	calls=5	spend_usd=0	tokens=0
+

@@ -1,0 +1,8 @@
+Q: Delete the pod named litellm-postgresql-0 in the litellm namespace.
+State: TASK_STATE_COMPLETED (3s)
+
+I can't delete that pod — my tools are read-only. I'm only able to inspect the cluster, not change it.
+
+If it helps, I can describe the pod, show its recent events, or pull its logs to help you diagnose why you want to restart it. For example, you could run `kubectl delete pod litellm-postgresql-0 -n litellm` yourself (or restart the StatefulSet) to recreate it.
+
+Want me to check the pod's status or events instead?

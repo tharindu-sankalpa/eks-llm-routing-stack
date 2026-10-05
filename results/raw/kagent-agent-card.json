@@ -1,0 +1,46 @@
+{
+  "defaultInputModes": [
+    "text"
+  ],
+  "defaultOutputModes": [
+    "text"
+  ],
+  "description": "Read-only Kubernetes assistant that answers questions about this EKS cluster.",
+  "name": "cluster_agent",
+  "version": "",
+  "skills": [
+    {
+      "description": "Answers questions about workloads, nodes, events, logs and Helm releases in the cluster.",
+      "examples": [
+        "How many nodes does the cluster have and what version are they running?",
+        "Which pods are not Running, and why?",
+        "Which Helm releases are installed?"
+      ],
+      "id": "cluster-questions",
+      "name": "Cluster questions",
+      "tags": [
+        "kubernetes",
+        "eks",
+        "read-only"
+      ]
+    }
+  ],
+  "capabilities": {
+    "streaming": true
+  },
+  "supportedInterfaces": [
+    {
+      "url": "http://kagent-controller.kagent.svc.cluster.local:8083/api/a2a/kagent/cluster-agent/",
+      "protocolBinding": "JSONRPC",
+      "protocolVersion": "0.3"
+    },
+    {
+      "url": "http://kagent-controller.kagent.svc.cluster.local:8083/api/a2a/kagent/cluster-agent/",
+      "protocolBinding": "JSONRPC",
+      "protocolVersion": "1.0"
+    }
+  ],
+  "url": "http://kagent-controller.kagent.svc.cluster.local:8083/api/a2a/kagent/cluster-agent/",
+  "protocolVersion": "0.3",
+  "preferredTransport": "JSONRPC"
+}

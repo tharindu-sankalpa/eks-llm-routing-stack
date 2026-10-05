@@ -1,0 +1,183 @@
+{
+    "id": "1",
+    "jsonrpc": "2.0",
+    "result": {
+        "task": {
+            "id": "939c627c-be95-4aa8-a2a8-4b61e136b3f7",
+            "contextId": "9116c938-46fb-4f2c-9dc0-7cd950f7e1b9",
+            "status": {
+                "state": "TASK_STATE_COMPLETED",
+                "timestamp": "2026-10-05T16:43:06.209703Z"
+            },
+            "artifacts": [
+                {
+                    "artifactId": "4eded6cf-0375-4ce7-b670-1581eb379683",
+                    "parts": [
+                        {
+                            "text": "**MCPServer** (kagent namespace)\n\n| Name | Ready | Age |\n|---|---|---|\n| everything | True | 3h39m |\n\n**RemoteMCPServer** (kagent namespace)\n\n| Name | Protocol | URL | Accepted |\n|---|---|---|---|\n| kagent-tool-server | STREAMABLE_HTTP | http://kagent-tools.kagent:8084/mcp | True |\n| litellm-mcp-everything | STREAMABLE_HTTP | http://litellm.litellm.svc.cluster.local:4000/mcp/ | True |\n| litellm-mcp-gateway | STREAMABLE_HTTP | http://litellm.litellm.svc.cluster.local:4000/mcp/ | True |\n\nNote: both litellm RemoteMCPServers point to the same URL."
+                        }
+                    ]
+                }
+            ],
+            "history": [
+                {
+                    "messageId": "q04-1791218580",
+                    "contextId": "9116c938-46fb-4f2c-9dc0-7cd950f7e1b9",
+                    "taskId": "939c627c-be95-4aa8-a2a8-4b61e136b3f7",
+                    "role": "ROLE_USER",
+                    "parts": [
+                        {
+                            "text": "Which MCPServer and RemoteMCPServer resources exist in the kagent namespace, and what URL does each RemoteMCPServer point to?"
+                        }
+                    ]
+                },
+                {
+                    "messageId": "q04-1791218580",
+                    "contextId": "9116c938-46fb-4f2c-9dc0-7cd950f7e1b9",
+                    "taskId": "939c627c-be95-4aa8-a2a8-4b61e136b3f7",
+                    "role": "ROLE_USER",
+                    "parts": [
+                        {
+                            "text": "Which MCPServer and RemoteMCPServer resources exist in the kagent namespace, and what URL does each RemoteMCPServer point to?"
+                        }
+                    ]
+                },
+                {
+                    "messageId": "ccfa1c1c-2554-472c-a2e9-b1dfc801d376",
+                    "role": "ROLE_AGENT",
+                    "parts": [
+                        {
+                            "text": "I'll check for those custom resources in the kagent namespace."
+                        },
+                        {
+                            "data": {
+                                "args": {
+                                    "namespace": "kagent",
+                                    "output": "wide",
+                                    "resource_type": "mcpservers"
+                                },
+                                "id": "call_01a10cf2813b771b893decc1",
+                                "name": "kagent_tools-k8s_get_resources"
+                            },
+                            "metadata": {
+                                "kagent_type": "function_call"
+                            }
+                        },
+                        {
+                            "data": {
+                                "args": {
+                                    "namespace": "kagent",
+                                    "output": "wide",
+                                    "resource_type": "remotemcpservers"
+                                },
+                                "id": "call_01a10cf281d370a5906ccfb4",
+                                "name": "kagent_tools-k8s_get_resources"
+                            },
+                            "metadata": {
+                                "kagent_type": "function_call"
+                            }
+                        }
+                    ],
+                    "metadata": {
+                        "kagent_user_id": "admin@kagent.dev",
+                        "kagent_session_id": "9116c938-46fb-4f2c-9dc0-7cd950f7e1b9",
+                        "kagent_author": "cluster_agent",
+                        "kagent_usage_metadata": {
+                            "candidatesTokenCount": 212.0,
+                            "promptTokenCount": 1759.0,
+                            "totalTokenCount": 1971.0
+                        },
+                        "kagent_invocation_id": "e-9e379be6-3cb4-4c60-a389-d13cc7f6e55a",
+                        "kagent_app_name": "kagent__NS__cluster_agent",
+                        "kagent_adk_partial": null
+                    }
+                },
+                {
+                    "messageId": "9f9f16bf-c187-494f-aafd-37f88347d291",
+                    "role": "ROLE_AGENT",
+                    "parts": [
+                        {
+                            "data": {
+                                "id": "call_01a10cf2813b771b893decc1",
+                                "response": {
+                                    "content": [
+                                        {
+                                            "text": "NAME         READY   AGE\neverything   True    3h39m\n",
+                                            "type": "text"
+                                        }
+                                    ],
+                                    "isError": false
+                                },
+                                "name": "kagent_tools-k8s_get_resources"
+                            },
+                            "metadata": {
+                                "kagent_type": "function_response"
+                            }
+                        },
+                        {
+                            "data": {
+                                "id": "call_01a10cf281d370a5906ccfb4",
+                                "response": {
+                                    "content": [
+                                        {
+                                            "text": "NAME                     PROTOCOL          URL                                                  ACCEPTED\nkagent-tool-server       STREAMABLE_HTTP   http://kagent-tools.kagent:8084/mcp                  True\nlitellm-mcp-everything   STREAMABLE_HTTP   http://litellm.litellm.svc.cluster.local:4000/mcp/   True\nlitellm-mcp-gateway      STREAMABLE_HTTP   http://litellm.litellm.svc.cluster.local:4000/mcp/   True\n",
+                                            "type": "text"
+                                        }
+                                    ],
+                                    "isError": false
+                                },
+                                "name": "kagent_tools-k8s_get_resources"
+                            },
+                            "metadata": {
+                                "kagent_type": "function_response"
+                            }
+                        }
+                    ],
+                    "metadata": {
+                        "kagent_user_id": "admin@kagent.dev",
+                        "kagent_session_id": "9116c938-46fb-4f2c-9dc0-7cd950f7e1b9",
+                        "kagent_invocation_id": "e-9e379be6-3cb4-4c60-a389-d13cc7f6e55a",
+                        "kagent_author": "cluster_agent",
+                        "kagent_app_name": "kagent__NS__cluster_agent",
+                        "kagent_adk_partial": null
+                    }
+                },
+                {
+                    "messageId": "057ee224-e762-422d-9d03-347fc157a280",
+                    "role": "ROLE_AGENT",
+                    "parts": [
+                        {
+                            "text": "**MCPServer** (kagent namespace)\n\n| Name | Ready | Age |\n|---|---|---|\n| everything | True | 3h39m |\n\n**RemoteMCPServer** (kagent namespace)\n\n| Name | Protocol | URL | Accepted |\n|---|---|---|---|\n| kagent-tool-server | STREAMABLE_HTTP | http://kagent-tools.kagent:8084/mcp | True |\n| litellm-mcp-everything | STREAMABLE_HTTP | http://litellm.litellm.svc.cluster.local:4000/mcp/ | True |\n| litellm-mcp-gateway | STREAMABLE_HTTP | http://litellm.litellm.svc.cluster.local:4000/mcp/ | True |\n\nNote: both litellm RemoteMCPServers point to the same URL."
+                        }
+                    ],
+                    "metadata": {
+                        "kagent_user_id": "admin@kagent.dev",
+                        "kagent_session_id": "9116c938-46fb-4f2c-9dc0-7cd950f7e1b9",
+                        "kagent_author": "cluster_agent",
+                        "kagent_usage_metadata": {
+                            "candidatesTokenCount": 253.0,
+                            "promptTokenCount": 2082.0,
+                            "totalTokenCount": 2335.0
+                        },
+                        "kagent_invocation_id": "e-9e379be6-3cb4-4c60-a389-d13cc7f6e55a",
+                        "kagent_app_name": "kagent__NS__cluster_agent",
+                        "kagent_adk_partial": null
+                    }
+                }
+            ],
+            "metadata": {
+                "kagent_user_id": "admin@kagent.dev",
+                "kagent_session_id": "9116c938-46fb-4f2c-9dc0-7cd950f7e1b9",
+                "kagent_author": "cluster_agent",
+                "kagent_usage_metadata": {
+                    "candidatesTokenCount": 253.0,
+                    "promptTokenCount": 2082.0,
+                    "totalTokenCount": 2335.0
+                },
+                "kagent_invocation_id": "e-9e379be6-3cb4-4c60-a389-d13cc7f6e55a",
+                "kagent_adk_partial": null,
+                "kagent_app_name": "kagent__NS__cluster_agent"
+            }
+        }
+    }
+}

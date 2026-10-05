@@ -1,0 +1,75 @@
+{
+    "agent_id": "37422511-51d9-43b7-bc7b-153374d184a5",
+    "agent_name": "everything_agent",
+    "litellm_params": {},
+    "agent_card_params": {
+        "url": "http://kagent-controller.kagent.svc.cluster.local:8083/api/a2a/kagent/everything-agent/",
+        "name": "everything_agent",
+        "skills": [
+            {
+                "id": "mcp-demo",
+                "name": "MCP demo tools",
+                "tags": [
+                    "mcp",
+                    "demo"
+                ],
+                "examples": [
+                    "Add 1234.5 and 8765.5.",
+                    "Echo the text: hello from kmcp."
+                ],
+                "description": "Echoes text and adds numbers using the MCP reference test server."
+            }
+        ],
+        "version": "1.0.0",
+        "provider": {
+            "url": "http://127.0.0.1:4000",
+            "organization": "LiteLLM Proxy"
+        },
+        "security": [
+            {
+                "LiteLLMKey": []
+            }
+        ],
+        "description": "Demo agent that uses the MCP reference test server deployed by kmcp.",
+        "capabilities": {
+            "streaming": true
+        },
+        "protocolVersion": "1.0",
+        "securitySchemes": {
+            "LiteLLMKey": {
+                "type": "http",
+                "scheme": "bearer",
+                "description": "LiteLLM virtual key"
+            }
+        },
+        "defaultInputModes": [
+            "text"
+        ],
+        "defaultOutputModes": [
+            "text"
+        ],
+        "supportedInterfaces": [
+            {
+                "url": "http://127.0.0.1:4000/a2a/37422511-51d9-43b7-bc7b-153374d184a5",
+                "protocolBinding": "JSONRPC",
+                "protocolVersion": "1.0"
+            }
+        ]
+    },
+    "object_permission": null,
+    "spend": 0.0,
+    "tpm_limit": null,
+    "rpm_limit": null,
+    "session_tpm_limit": null,
+    "session_rpm_limit": null,
+    "static_headers": {},
+    "extra_headers": [],
+    "access_group_ids": [],
+    "kill_switch": null,
+    "keys": null,
+    "search_score": null,
+    "created_at": "2026-10-05T16:42:13.566000Z",
+    "updated_at": "2026-10-05T16:42:13.566000Z",
+    "created_by": "default_user_id",
+    "updated_by": "default_user_id"
+}

@@ -1,0 +1,12 @@
+Q: Which Helm releases are installed, in which namespaces, and what chart version is each?
+State: TASK_STATE_COMPLETED (5s)
+
+Three Helm releases are installed, all in `deployed` status:
+
+| Release | Namespace | Chart | Chart version | App version | Revision |
+|---|---|---|---|---|---|
+| kagent | kagent | kagent | 0.9.10 | — | 1 |
+| kagent-crds | kagent | kagent-crds | 0.9.10 | — | 1 |
+| litellm | litellm | litellm-helm | 1.1.3 | v1.85.1 | 1 |
+
+All are at revision 1.

@@ -1,0 +1,77 @@
+{
+    "agent_id": "2044794b-cd90-4bd4-8e41-db7e2a7e8fdd",
+    "agent_name": "cluster_agent",
+    "litellm_params": {},
+    "agent_card_params": {
+        "url": "http://kagent-controller.kagent.svc.cluster.local:8083/api/a2a/kagent/cluster-agent/",
+        "name": "cluster_agent",
+        "skills": [
+            {
+                "id": "cluster-questions",
+                "name": "Cluster questions",
+                "tags": [
+                    "kubernetes",
+                    "eks",
+                    "read-only"
+                ],
+                "examples": [
+                    "How many nodes does the cluster have and what version are they running?",
+                    "Which pods are not Running, and why?",
+                    "Which Helm releases are installed?"
+                ],
+                "description": "Answers questions about workloads, nodes, events, logs and Helm releases in the cluster."
+            }
+        ],
+        "version": "1.0.0",
+        "provider": {
+            "url": "http://127.0.0.1:4000",
+            "organization": "LiteLLM Proxy"
+        },
+        "security": [
+            {
+                "LiteLLMKey": []
+            }
+        ],
+        "description": "Read-only Kubernetes assistant that answers questions about this EKS cluster.",
+        "capabilities": {
+            "streaming": true
+        },
+        "protocolVersion": "1.0",
+        "securitySchemes": {
+            "LiteLLMKey": {
+                "type": "http",
+                "scheme": "bearer",
+                "description": "LiteLLM virtual key"
+            }
+        },
+        "defaultInputModes": [
+            "text"
+        ],
+        "defaultOutputModes": [
+            "text"
+        ],
+        "supportedInterfaces": [
+            {
+                "url": "http://127.0.0.1:4000/a2a/2044794b-cd90-4bd4-8e41-db7e2a7e8fdd",
+                "protocolBinding": "JSONRPC",
+                "protocolVersion": "1.0"
+            }
+        ]
+    },
+    "object_permission": null,
+    "spend": 0.0,
+    "tpm_limit": null,
+    "rpm_limit": null,
+    "session_tpm_limit": null,
+    "session_rpm_limit": null,
+    "static_headers": {},
+    "extra_headers": [],
+    "access_group_ids": [],
+    "kill_switch": null,
+    "keys": null,
+    "search_score": null,
+    "created_at": "2026-10-05T13:15:54.710000Z",
+    "updated_at": "2026-10-05T13:15:54.710000Z",
+    "created_by": "default_user_id",
+    "updated_by": "default_user_id"
+}

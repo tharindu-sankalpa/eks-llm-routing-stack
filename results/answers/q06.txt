@@ -1,0 +1,11 @@
+Q: What container images does the litellm namespace run?
+State: TASK_STATE_COMPLETED (4s)
+
+The `litellm` namespace runs two pods with these container images:
+
+| Pod | Container | Image |
+|-----|-----------|-------|
+| litellm-7c75fcc647-vhkpv | litellm | `ghcr.io/berriai/litellm:v1.104.0` |
+| litellm-postgresql-0 | postgresql | `docker.io/bitnamilegacy/postgresql:16.2.0-debian-12-r6` |
+
+Both pods are Running and Ready.

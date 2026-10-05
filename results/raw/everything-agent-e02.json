@@ -1,0 +1,146 @@
+{
+    "id": "1",
+    "jsonrpc": "2.0",
+    "result": {
+        "task": {
+            "id": "ec3821a4-2395-44c3-afeb-9b4c189f9217",
+            "contextId": "d5e7c34c-bacb-4d09-814d-fbf4f6be0b68",
+            "status": {
+                "state": "TASK_STATE_COMPLETED",
+                "timestamp": "2026-10-05T16:42:33.047557Z"
+            },
+            "artifacts": [
+                {
+                    "artifactId": "55ad9ee4-97ee-456f-abec-21521bc9d674",
+                    "parts": [
+                        {
+                            "text": "The tool **kmcp_everything-echo** returned: Echo: hello from kmcp"
+                        }
+                    ]
+                }
+            ],
+            "history": [
+                {
+                    "messageId": "e02",
+                    "contextId": "d5e7c34c-bacb-4d09-814d-fbf4f6be0b68",
+                    "taskId": "ec3821a4-2395-44c3-afeb-9b4c189f9217",
+                    "role": "ROLE_USER",
+                    "parts": [
+                        {
+                            "text": "Echo the text: hello from kmcp."
+                        }
+                    ]
+                },
+                {
+                    "messageId": "e02",
+                    "contextId": "d5e7c34c-bacb-4d09-814d-fbf4f6be0b68",
+                    "taskId": "ec3821a4-2395-44c3-afeb-9b4c189f9217",
+                    "role": "ROLE_USER",
+                    "parts": [
+                        {
+                            "text": "Echo the text: hello from kmcp."
+                        }
+                    ]
+                },
+                {
+                    "messageId": "0275de29-50de-43da-9f72-862e7b59dbf9",
+                    "role": "ROLE_AGENT",
+                    "parts": [
+                        {
+                            "data": {
+                                "args": {
+                                    "message": "hello from kmcp"
+                                },
+                                "id": "call-46517a58-27ee-4497-bab1-0f0eabb61792-0",
+                                "name": "kmcp_everything-echo"
+                            },
+                            "metadata": {
+                                "kagent_type": "function_call"
+                            }
+                        }
+                    ],
+                    "metadata": {
+                        "kagent_user_id": "admin@kagent.dev",
+                        "kagent_session_id": "d5e7c34c-bacb-4d09-814d-fbf4f6be0b68",
+                        "kagent_author": "everything_agent",
+                        "kagent_usage_metadata": {
+                            "candidatesTokenCount": 56.0,
+                            "promptTokenCount": 1956.0,
+                            "totalTokenCount": 2012.0
+                        },
+                        "kagent_invocation_id": "e-41d14664-254f-453b-bb90-28ad3a614098",
+                        "kagent_app_name": "kagent__NS__everything_agent",
+                        "kagent_adk_partial": null
+                    }
+                },
+                {
+                    "messageId": "f9bb8045-69ae-4e46-9758-d73bfb19801e",
+                    "role": "ROLE_AGENT",
+                    "parts": [
+                        {
+                            "data": {
+                                "id": "call-46517a58-27ee-4497-bab1-0f0eabb61792-0",
+                                "response": {
+                                    "content": [
+                                        {
+                                            "text": "Echo: hello from kmcp",
+                                            "type": "text"
+                                        }
+                                    ],
+                                    "isError": false
+                                },
+                                "name": "kmcp_everything-echo"
+                            },
+                            "metadata": {
+                                "kagent_type": "function_response"
+                            }
+                        }
+                    ],
+                    "metadata": {
+                        "kagent_user_id": "admin@kagent.dev",
+                        "kagent_session_id": "d5e7c34c-bacb-4d09-814d-fbf4f6be0b68",
+                        "kagent_invocation_id": "e-41d14664-254f-453b-bb90-28ad3a614098",
+                        "kagent_author": "everything_agent",
+                        "kagent_app_name": "kagent__NS__everything_agent",
+                        "kagent_adk_partial": null
+                    }
+                },
+                {
+                    "messageId": "5ccc0adc-0d2a-4e5b-b176-d4e548042918",
+                    "role": "ROLE_AGENT",
+                    "parts": [
+                        {
+                            "text": "The tool **kmcp_everything-echo** returned: Echo: hello from kmcp"
+                        }
+                    ],
+                    "metadata": {
+                        "kagent_user_id": "admin@kagent.dev",
+                        "kagent_session_id": "d5e7c34c-bacb-4d09-814d-fbf4f6be0b68",
+                        "kagent_author": "everything_agent",
+                        "kagent_usage_metadata": {
+                            "candidatesTokenCount": 63.0,
+                            "promptTokenCount": 1984.0,
+                            "totalTokenCount": 2047.0
+                        },
+                        "kagent_invocation_id": "e-41d14664-254f-453b-bb90-28ad3a614098",
+                        "kagent_app_name": "kagent__NS__everything_agent",
+                        "kagent_adk_partial": null
+                    }
+                }
+            ],
+            "metadata": {
+                "kagent_user_id": "admin@kagent.dev",
+                "kagent_session_id": "d5e7c34c-bacb-4d09-814d-fbf4f6be0b68",
+                "kagent_author": "everything_agent",
+                "kagent_usage_metadata": {
+                    "candidatesTokenCount": 63.0,
+                    "promptTokenCount": 1984.0,
+                    "totalTokenCount": 2047.0
+                },
+                "kagent_invocation_id": "e-41d14664-254f-453b-bb90-28ad3a614098",
+                "kagent_adk_partial": null,
+                "kagent_app_name": "kagent__NS__everything_agent"
+            }
+        }
+    }
+}

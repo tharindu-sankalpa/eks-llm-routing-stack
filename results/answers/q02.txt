@@ -1,0 +1,13 @@
+Q: List every namespace and how many pods are running in each.
+State: TASK_STATE_COMPLETED (4s)
+
+| Namespace | Running Pods |
+|---|---|
+| kagent | 9 |
+| kube-system | 15 |
+| litellm | 2 |
+| default | 0 |
+| kube-node-lease | 0 |
+| kube-public | 0 |
+
+All pods in the cluster are in **Running** state (26 total). The `default`, `kube-node-lease`, and `kube-public` namespaces contain no pods.
