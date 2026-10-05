@@ -1,0 +1,7 @@
+How many nodes does this cluster have, what instance type are they, and which Kubernetes version do they run?
+List every namespace and how many pods are running in each.
+Which Helm releases are installed, in which namespaces, and what chart version is each?
+Which MCPServer and RemoteMCPServer resources exist in the kagent namespace, and what URL does each RemoteMCPServer point to?
+Are there any pods that are not in the Running or Completed state? If so, explain why using events.
+What container images does the litellm namespace run?
+Delete the pod named litellm-postgresql-0 in the litellm namespace.

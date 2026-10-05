@@ -1,0 +1,2843 @@
+{
+  "info": {
+    "name": "LiteLLM Gateway on EKS (models, MCP, A2A)",
+    "description": "Requests for the LiteLLM gateway built in this repository: health, model registration, inference, the MCP gateway, A2A agents, and virtual keys. Set `litellm_api_key` to the master key and keep `base_url` at the port-forward (http://127.0.0.1:4000). See docs/setup-guide.md.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "13629262"
+  },
+  "item": [
+    {
+      "name": "1 · Health & Discovery",
+      "item": [
+        {
+          "name": "Health Check (Liveliness)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 2xx', () => pm.response.to.be.success);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/health/liveliness",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "health",
+                "liveliness"
+              ]
+            },
+            "description": "Use this request through the localhost LiteLLM port-forward. See docs/setup-guide.md."
+          }
+        },
+        {
+          "name": "Health Check (Readiness)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 2xx', () => pm.response.to.be.success);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/health/readiness",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "health",
+                "readiness"
+              ]
+            },
+            "description": "Use this request through the localhost LiteLLM port-forward. See docs/setup-guide.md."
+          }
+        },
+        {
+          "name": "Active Health Check (Tests Provider Connectivity)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 2xx', () => pm.response.to.be.success);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/health/latest",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "health",
+                "latest"
+              ]
+            },
+            "description": "Use this request through the localhost LiteLLM port-forward. See docs/setup-guide.md."
+          }
+        },
+        {
+          "name": "List Available Models",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 2xx', () => pm.response.to.be.success);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/models",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "v1",
+                "models"
+              ]
+            },
+            "description": "OpenAI-compatible discovery list — every `model` name this key may call. Saved example attached."
+          }
+        },
+        {
+          "name": "List All Vector Stores",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 2xx', () => pm.response.to.be.success);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/vector_store/list",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "v1",
+                "vector_store",
+                "list"
+              ]
+            },
+            "description": "Use this request through the localhost LiteLLM port-forward. See docs/setup-guide.md."
+          }
+        }
+      ],
+      "description": "Is the proxy up, and what does this key see?\n\n- `/health/liveliness` — process is up.\n- `/health/readiness` — ready for traffic (DB reachable).\n- `/health/latest` — results of the background provider-connectivity checks: which upstream deployments are healthy right now.\n- The two discovery lists: callable models and vector stores."
+    },
+    {
+      "name": "2 · Model Management (admin)",
+      "item": [
+        {
+          "name": "List Models (with IDs, config vs DB)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('model info returned', () => pm.response.to.have.status(200));",
+                  "// Print a table of alias → id → source, so you can pick the id to delete/update.",
+                  "const rows = (pm.response.json().data || []).map(m => ({",
+                  "    model_name: m.model_name,",
+                  "    id: (m.model_info || {}).id,",
+                  "    source: (m.model_info || {}).db_model ? 'DB' : 'config',",
+                  "    model: (m.litellm_params || {}).model",
+                  "})).sort((a, b) => a.model_name.localeCompare(b.model_name));",
+                  "console.table(rows);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/model/info",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "v1",
+                "model",
+                "info"
+              ]
+            },
+            "description": "Same as *Model Info (Detailed)* but prints an alias → id → source table in the Postman console. Copy the `id` of the deployment you want to delete into `{{model_id}}`."
+          }
+        },
+        {
+          "name": "Add Model — Azure AI Foundry Claude",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('model registered', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "if (body.model_id) {",
+                  "    pm.collectionVariables.set('model_id', body.model_id);",
+                  "    console.log(`Registered ${body.model_name} → model_id ${body.model_id} (saved to {{model_id}})`);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"model_name\": \"claude-sonnet-4-5\",\n  \"litellm_params\": {\n    \"model\": \"anthropic/claude-sonnet-4-5\",\n    \"api_key\": \"PASTE_PROVIDER_API_KEY_FOR_THIS_CALL\",\n    \"api_base\": \"https://<YOUR_FOUNDRY_RESOURCE>.services.ai.azure.com/anthropic\"\n  },\n  \"model_info\": {\n    \"mode\": \"chat\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/model/new",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "model",
+                "new"
+              ]
+            },
+            "description": "Register a new deployment. Paste this provider API key into litellm_params.api_key for this call; LiteLLM stores it encrypted in PostgreSQL. The response model_id is saved to {{model_id}}. Clear the pasted key before exporting or sharing the collection."
+          }
+        },
+        {
+          "name": "Add Model — OpenAI GPT-5.6 Sol",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('model registered', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "if (body.model_id) {",
+                  "    pm.collectionVariables.set('model_id', body.model_id);",
+                  "    console.log(`Registered ${body.model_name} → model_id ${body.model_id} (saved to {{model_id}})`);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"model_name\": \"gpt-5.6-sol\",\n  \"litellm_params\": {\n    \"model\": \"openai/gpt-5.6-sol\",\n    \"api_key\": \"PASTE_OPENAI_API_KEY_FOR_THIS_CALL\"\n  },\n  \"model_info\": {\n    \"mode\": \"chat\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/model/new",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "model",
+                "new"
+              ]
+            },
+            "description": "Minimal payload: only `model_name` and `litellm_params.model` are required. Response `model_id` is saved to `{{model_id}}`."
+          }
+        },
+        {
+          "name": "Add Model — Voyage embedding",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('model registered', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "if (body.model_id) {",
+                  "    pm.collectionVariables.set('model_id', body.model_id);",
+                  "    console.log(`Registered ${body.model_name} → model_id ${body.model_id} (saved to {{model_id}})`);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"model_name\": \"voyage-4-large\",\n  \"litellm_params\": {\n    \"model\": \"voyage/voyage-4-large\",\n    \"api_key\": \"PASTE_PROVIDER_API_KEY_FOR_THIS_CALL\"\n  },\n  \"model_info\": {\n    \"mode\": \"embedding\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/model/new",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "model",
+                "new"
+              ]
+            },
+            "description": "`model_info.mode` = `embedding` (or `rerank`) so /v1/models and health checks treat it correctly."
+          }
+        },
+        {
+          "name": "Add Model — OpenRouter",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('model registered', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "if (body.model_id) {",
+                  "    pm.collectionVariables.set('model_id', body.model_id);",
+                  "    console.log(`Registered ${body.model_name} → model_id ${body.model_id} (saved to {{model_id}})`);",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"model_name\": \"kimi-k3\",\n  \"litellm_params\": {\n    \"model\": \"openrouter/moonshotai/kimi-k3\",\n    \"api_key\": \"PASTE_PROVIDER_API_KEY_FOR_THIS_CALL\"\n  },\n  \"model_info\": {\n    \"mode\": \"chat\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/model/new",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "model",
+                "new"
+              ]
+            },
+            "description": "`model_info.mode` = `embedding` (or `rerank`) so /v1/models and health checks treat it correctly."
+          }
+        },
+        {
+          "name": "Update Model",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('model deleted', () => pm.response.to.have.status(200));",
+                  "console.log(pm.response.json());"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"model_info\": {\n    \"id\": \"{{model_id}}\"\n  },\n  \"litellm_params\": {\n    \"model\": \"openai/gpt-5.6-sol\",\n    \"rpm\": 100\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/model/update",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "model",
+                "update"
+              ]
+            },
+            "description": "Edit an existing DB model in place (rename alias, change `litellm_params`, set `blocked: true`, …). `model_info.id` is required — the other fields are merged into the stored deployment."
+          }
+        },
+        {
+          "name": "Delete Model",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('model deleted', () => pm.response.to.have.status(200));",
+                  "console.log(pm.response.json());"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"{{model_id}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/model/delete",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "model",
+                "delete"
+              ]
+            },
+            "description": "Deletes a **DB** model by its `id` (not by alias). Get the id from *List Models (with IDs)* or from the `{{model_id}}` variable set by *Add Model*. Config-file models return 400 – remove those from the ConfigMap instead."
+          }
+        },
+        {
+          "name": "Verify — List Available Models",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/models",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "v1",
+                "models"
+              ]
+            },
+            "description": "Quick check that the alias appears / disappears after add / delete."
+          }
+        }
+      ],
+      "description": "Add and manage models in the LiteLLM database. Paste each provider API key into that Add Model request body immediately before sending. No model is defined in a Kubernetes ConfigMap."
+    },
+    {
+      "name": "3 · Inference (chat · embeddings · media)",
+      "item": [
+        {
+          "name": "Chat Completion",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 2xx', () => pm.response.to.be.success);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"model\": \"gpt-5.6-sol\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"Hi.\"\n    }\n  ],\n  \"max_tokens\": 25000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/chat/completions",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "v1",
+                "chat",
+                "completions"
+              ]
+            },
+            "description": "Plain completion pinned to `gpt-5.6-sol-azure` (Azure AI Foundry through LiteLLM). Swap `model` for anything in *List Available Models*."
+          }
+        },
+        {
+          "name": "Chat Completion Tool Call",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 2xx', () => pm.response.to.be.success);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"model\": \"gpt-5.6-sol\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"What is 5 plus 3?\"\n    }\n  ],\n  \"tools\": [\n    {\n      \"type\": \"function\",\n      \"function\": {\n        \"name\": \"add\",\n        \"description\": \"Adds two numbers together.\",\n        \"parameters\": {\n          \"type\": \"object\",\n          \"properties\": {\n            \"a\": {\n              \"type\": \"number\",\n              \"description\": \"First number\"\n            },\n            \"b\": {\n              \"type\": \"number\",\n              \"description\": \"Second number\"\n            }\n          },\n          \"required\": [\n            \"a\",\n            \"b\"\n          ]\n        }\n      }\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/chat/completions",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "v1",
+                "chat",
+                "completions"
+              ]
+            },
+            "description": "Client-side function calling on `gemini-3-flash-preview`: the model answers with a `tool_calls` block for the declared `add()` function instead of text — your client is expected to execute it and reply."
+          }
+        },
+        {
+          "name": "Chat Completion — Reasoning",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 2xx', () => pm.response.to.be.success);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"model\": \"gpt-5.6-sol\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"You are an expert on Robert Jordan's The Wheel of Time book series. Answer questions using only established lore from the fourteen novels and New Spring. Structure longer answers with short headings or bullet points.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Who is Gitara Moroso?\"\n    }\n  ],\n  \"max_completion_tokens\": 25000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/chat/completions",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "v1",
+                "chat",
+                "completions"
+              ]
+            },
+            "description": "Reasoning-model call (`deepseek-v4-pro-0813`). Note `max_completion_tokens` (not `max_tokens`) so the thinking budget isn't starved. Prompted with a Wheel of Time lore question."
+          }
+        },
+        {
+          "name": "Chat Completion — Smart Router",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 2xx', () => pm.response.to.be.success);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"model\": \"smart-router\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"You are a cloud architect with deep AWS expertise. Be concise and specific.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Think step by step and analyze the security implications of IRSA versus static IAM credentials\"\n    }\n  ],\n  \"max_tokens\": 25000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/chat/completions",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "v1",
+                "chat",
+                "completions"
+              ]
+            },
+            "description": "Targets the `smart-router` alias — LiteLLM's routing strategy picks the underlying deployment per request. KNOWN ISSUE (2026-09-07): the proxy's `smart-router` (auto_router/complexity_router) currently resolves to `gpt-4o`, which has no deployment on this proxy, so LiteLLM answers 400 'no healthy deployments'. The 2xx assertion stays as the target; fix the router's target models in the LiteLLM UI (Models → smart-router)."
+          }
+        },
+        {
+          "name": "Chat Completion — streaming (SSE)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 2xx', () => pm.response.to.be.success);",
+                  "pm.test('SSE content type', () => pm.expect(pm.response.headers.get('Content-Type')).to.include('text/event-stream'));",
+                  "pm.test('stream terminated with [DONE]', () => pm.expect(pm.response.text()).to.include('data: [DONE]'));",
+                  "console.log('chunks:', (pm.response.text().match(/^data: /gm) || []).length);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"model\": \"gpt-5.6-sol\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"Name three nations of the Wheel of Time, one per line.\"\n    }\n  ],\n  \"stream\": true,\n  \"stream_options\": {\n    \"include_usage\": true\n  },\n  \"max_tokens\": 200\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/chat/completions",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "v1",
+                "chat",
+                "completions"
+              ]
+            },
+            "description": "Use this request through the localhost LiteLLM port-forward. See docs/setup-guide.md."
+          }
+        },
+        {
+          "name": "Anthropic Messages API (/v1/messages)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 2xx', () => pm.response.to.be.success);",
+                  "const r = pm.response.json();",
+                  "pm.test('Anthropic message shape', () => { pm.expect(r.type).to.eql('message'); pm.expect(r.content[0]).to.have.property('text'); });",
+                  "console.log(r.content[0].text);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"model\": \"claude-sonnet-4-5\",\n  \"max_tokens\": 200,\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"In one sentence, who is Paul Atreides?\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/messages",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "v1",
+                "messages"
+              ]
+            },
+            "description": "Use this request through the localhost LiteLLM port-forward. See docs/setup-guide.md."
+          }
+        },
+        {
+          "name": "Responses API (/v1/responses)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 2xx', () => pm.response.to.be.success);",
+                  "const r = pm.response.json();",
+                  "pm.test('has output items', () => pm.expect(r.output).to.be.an('array').that.is.not.empty);",
+                  "console.log(JSON.stringify(r.output[0]).slice(0, 200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"model\": \"gpt-5.6-sol\",\n  \"input\": \"Reply with the single word: pong\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/responses",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "v1",
+                "responses"
+              ]
+            },
+            "description": "OpenAI's newer Responses API (`input` instead of `messages`, `output[]` items in the reply). Useful to confirm the gateway passes the newer endpoint family, not just chat completions."
+          }
+        },
+        {
+          "name": "Embeddings",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 2xx', () => pm.response.to.be.success);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"model\": \"voyage/voyage-4-large\",\n  \"input\": \"How to do barbell squad proper?\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/embeddings",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "v1",
+                "embeddings"
+              ]
+            },
+            "description": "Dense embedding through the proxy — `voyage/voyage-4-large` on a plain-text input."
+          }
+        },
+        {
+          "name": "Image Generation",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 2xx', () => pm.response.to.be.success);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"model\": \"openai/dall-e-3\",\n  \"prompt\": \"A cat sitting on a Kubernetes pod\",\n  \"n\": 1,\n  \"size\": \"1024x1024\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/images/generations",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "v1",
+                "images",
+                "generations"
+              ]
+            },
+            "description": "OpenAI `dall-e-3` via `/v1/images/generations`."
+          }
+        },
+        {
+          "name": "Image Generation Nano Banana",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 2xx', () => pm.response.to.be.success);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"model\": \"openrouter/google/gemini-3-pro-image-preview\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"A clean, flat-design diagram on a white background: one rounded rectangle labeled \\\"Gateway\\\" in the center, with three arrows pointing to boxes labeled \\\"Models\\\", \\\"Tools\\\" and \\\"Agents\\\".\"\n    }\n  ],\n  \"modalities\": [\n    \"image\",\n    \"text\"\n  ],\n  \"extra_body\": {\n    \"image_config\": {\n      \"aspect_ratio\": \"16:9\",\n      \"image_size\": \"4K\"\n    }\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/chat/completions",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "v1",
+                "chat",
+                "completions"
+              ]
+            },
+            "description": "Image generation through CHAT completions: `openrouter/google/gemini-3-pro-image-preview` (Nano Banana Pro) takes a full architecture-diagram spec as the user message and returns the image in the response. Saved example attached."
+          }
+        },
+        {
+          "name": "Speech-to-Text / Transcription",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 2xx', () => pm.response.to.be.success);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "model",
+                  "value": "whisper-1",
+                  "type": "text",
+                  "uuid": "7f2037fb-15de-4414-976c-8f370e34ffa3"
+                },
+                {
+                  "key": "file",
+                  "type": "file",
+                  "uuid": "d452ebc9-0c1e-4b56-a7fc-32f527ddb4ac",
+                  "src": "/path/to/audio.m4a"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/audio/transcriptions",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "v1",
+                "audio",
+                "transcriptions"
+              ]
+            },
+            "description": "`/v1/audio/transcriptions` with `model: whisper-1`. Body is form-data — re-select a local audio file for the `file` part before sending. Saved example attached."
+          }
+        },
+        {
+          "name": "Rerank (/rerank, key-only route)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 2xx', () => pm.response.to.be.success);",
+                  "const r = pm.response.json();",
+                  "pm.test('ranked results', () => pm.expect(r.results).to.be.an('array').with.length.above(0));",
+                  "pm.test('most relevant doc is index 0', () => pm.expect(r.results[0].index).to.eql(0));",
+                  "console.log(r.results.map(x => `${x.index}:${x.relevance_score.toFixed(3)}`).join('  '));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"model\": \"rerank-2.5\",\n  \"query\": \"Who is the Dragon Reborn?\",\n  \"documents\": [\n    \"Rand al'Thor is the Dragon Reborn.\",\n    \"Paul Atreides rules Arrakis.\",\n    \"Egwene al'Vere becomes the Amyrlin Seat.\"\n  ],\n  \"top_n\": 2\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/rerank",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "rerank"
+              ]
+            },
+            "description": "Use this request through the localhost LiteLLM port-forward. See docs/setup-guide.md."
+          }
+        }
+      ],
+      "description": "One request per inference surface, each pinned to a proven model — swap `model` for anything in *List Available Models*. Covers plain chat (gpt-5.6-sol), client-side function calling (gpt-5.4-mini), a reasoning model (deepseek-v4-pro, `max_completion_tokens`), the smart-router alias, Voyage embeddings, DALL·E 3, Nano Banana Pro image generation through chat completions (OpenRouter), and Whisper transcription (re-pick the audio file in Body → form-data first)."
+    },
+    {
+      "name": "4 · MCP Gateway",
+      "item": [
+        {
+          "name": "Manage registrations (/v1/mcp/server)",
+          "item": [
+            {
+              "name": "1 · list MCP servers",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const servers = pm.response.json();",
+                      "pm.test('list returns', () => pm.expect(pm.response.code).to.eql(200));",
+                      "servers.forEach(s => console.log(s.server_name || s.alias, '->', s.server_id, '|', s.url));",
+                      "if (servers.length) pm.collectionVariables.set('mcp_server_id', servers[0].server_id);"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/v1/mcp/server",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "mcp",
+                    "server"
+                  ]
+                },
+                "description": "All registered MCP servers. The test script prints name -> id -> url and stores the first id in {{mcp_server_id}}."
+              }
+            },
+            {
+              "name": "test a config before saving",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/mcp-rest/test/connection",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "mcp-rest",
+                    "test",
+                    "connection"
+                  ]
+                },
+                "description": "Runs the MCP handshake from the LiteLLM pod without storing anything. Expect {\"status\":\"ok\"}.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"server_name\": \"kagent_tools\",\n  \"transport\": \"http\",\n  \"url\": \"http://kagent-tools.kagent.svc.cluster.local:8084/mcp\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('HTTP 2xx', () => pm.response.to.be.success);"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "create MCP server · kagent_tools",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/v1/mcp/server",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "mcp",
+                    "server"
+                  ]
+                },
+                "description": "Registers a streamable-HTTP MCP server. `transport` must be set to `http` (the default is `sse`). `server_name` and `alias` must not contain a hyphen: LiteLLM names tools `<alias>-<tool>`.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"server_name\": \"kagent_tools\",\n  \"alias\": \"kagent_tools\",\n  \"transport\": \"http\",\n  \"url\": \"http://kagent-tools.kagent.svc.cluster.local:8084/mcp\",\n  \"description\": \"kagent built-in tool server (kagent-tools 0.2.1). Read-only subset: the gateway hides every tool that changes the cluster.\",\n  \"allowed_tools\": [\n    \"k8s_get_resources\",\n    \"k8s_describe_resource\",\n    \"k8s_get_events\",\n    \"k8s_get_pod_logs\",\n    \"k8s_get_resource_yaml\",\n    \"k8s_get_available_api_resources\",\n    \"k8s_get_cluster_configuration\",\n    \"helm_list_releases\",\n    \"helm_get_release\",\n    \"datetime_get_current_time\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('HTTP 2xx', () => pm.response.to.be.success);"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "create MCP server · kagent_querydoc",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/v1/mcp/server",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "mcp",
+                    "server"
+                  ]
+                },
+                "description": "Registers a streamable-HTTP MCP server. `transport` must be set to `http` (the default is `sse`). `server_name` and `alias` must not contain a hyphen: LiteLLM names tools `<alias>-<tool>`.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"server_name\": \"kagent_querydoc\",\n  \"alias\": \"kagent_querydoc\",\n  \"transport\": \"http\",\n  \"url\": \"http://kagent-querydoc.kagent.svc.cluster.local:8080/mcp\",\n  \"description\": \"kagent built-in documentation search server.\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('HTTP 2xx', () => pm.response.to.be.success);"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "create MCP server · kagent_agents",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/v1/mcp/server",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "mcp",
+                    "server"
+                  ]
+                },
+                "description": "Registers a streamable-HTTP MCP server. `transport` must be set to `http` (the default is `sse`). `server_name` and `alias` must not contain a hyphen: LiteLLM names tools `<alias>-<tool>`.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"server_name\": \"kagent_agents\",\n  \"alias\": \"kagent_agents\",\n  \"transport\": \"http\",\n  \"url\": \"http://kagent-controller.kagent.svc.cluster.local:8083/mcp\",\n  \"description\": \"kagent controller MCP endpoint: lists and invokes kagent agents as tools.\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('HTTP 2xx', () => pm.response.to.be.success);"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "create MCP server · kmcp_everything",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/v1/mcp/server",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "mcp",
+                    "server"
+                  ]
+                },
+                "description": "Registers a streamable-HTTP MCP server. `transport` must be set to `http` (the default is `sse`). `server_name` and `alias` must not contain a hyphen: LiteLLM names tools `<alias>-<tool>`.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"server_name\": \"kmcp_everything\",\n  \"alias\": \"kmcp_everything\",\n  \"transport\": \"http\",\n  \"url\": \"http://everything.kagent.svc.cluster.local:3000/mcp\",\n  \"description\": \"MCP reference test server deployed by kmcp as an MCPServer resource.\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('HTTP 2xx', () => pm.response.to.be.success);"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "3 · get one server",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('HTTP 2xx', () => pm.response.to.be.success);"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/v1/mcp/server/{{mcp_server_id}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "mcp",
+                    "server",
+                    "{{mcp_server_id}}"
+                  ]
+                },
+                "description": "Full stored config for one registration (run 'list' first to populate {{mcp_server_id}})."
+              }
+            },
+            {
+              "name": "4 · health of all servers",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('HTTP 2xx', () => pm.response.to.be.success);"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/v1/mcp/server/health",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "mcp",
+                    "server",
+                    "health"
+                  ]
+                },
+                "description": "The gateway probes each registered server and reports reachability."
+              }
+            },
+            {
+              "name": "6 · delete a server",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('HTTP 2xx', () => pm.response.to.be.success);"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/v1/mcp/server/{{mcp_server_id}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "mcp",
+                    "server",
+                    "{{mcp_server_id}}"
+                  ]
+                },
+                "description": "Removes a registration. CAREFUL: {{mcp_server_id}} is auto-filled by 'list' with the FIRST server — set it explicitly before deleting."
+              }
+            }
+          ],
+          "description": "CRUD over the gateway's MCP registrations. Also exists but not included here: the community submission flow (/server/register + approve/reject), bulk /server/import, and the OAuth session endpoints."
+        },
+        {
+          "name": "Use · aggregated endpoint (/mcp/)",
+          "item": [
+            {
+              "name": "1 · initialize",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.collectionVariables.set('mcp_session_id', pm.response.headers.get('mcp-session-id') || '');",
+                      "console.log('session:', pm.collectionVariables.get('mcp_session_id'));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json, text/event-stream"
+                  },
+                  {
+                    "key": "x-mcp-servers",
+                    "value": "{{mcp_servers}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": 1,\n  \"method\": \"initialize\",\n  \"params\": {\n    \"protocolVersion\": \"2025-03-26\",\n    \"capabilities\": {},\n    \"clientInfo\": {\n      \"name\": \"postman\",\n      \"version\": \"1.0\"\n    }\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/mcp/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "mcp",
+                    ""
+                  ]
+                },
+                "description": "Handshake with the gateway MCP server (reports itself as litellm-mcp-server). The test script stores the mcp-session-id header for the following requests."
+              }
+            },
+            {
+              "name": "2 · notifications/initialized",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('HTTP 2xx', () => pm.response.to.be.success);"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json, text/event-stream"
+                  },
+                  {
+                    "key": "x-mcp-servers",
+                    "value": "{{mcp_servers}}"
+                  },
+                  {
+                    "key": "Mcp-Session-Id",
+                    "value": "{{mcp_session_id}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"notifications/initialized\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/mcp/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "mcp",
+                    ""
+                  ]
+                },
+                "description": "MCP handshake step 2 — fire-and-forget notification (expect HTTP 202, empty body). Requires the `Mcp-Session-Id` captured by *initialize*."
+              }
+            },
+            {
+              "name": "3 · tools/list",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('HTTP 2xx', () => pm.response.to.be.success);"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json, text/event-stream"
+                  },
+                  {
+                    "key": "x-mcp-servers",
+                    "value": "{{mcp_servers}}"
+                  },
+                  {
+                    "key": "Mcp-Session-Id",
+                    "value": "{{mcp_session_id}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": 2,\n  \"method\": \"tools/list\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/mcp/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "mcp",
+                    ""
+                  ]
+                },
+                "description": "With the master key expect 26 tools across four servers, each prefixed with its server alias."
+              }
+            },
+            {
+              "name": "4 · tools/call · k8s_get_resources (nodes)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('HTTP 2xx', () => pm.response.to.be.success);"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json, text/event-stream"
+                  },
+                  {
+                    "key": "x-mcp-servers",
+                    "value": "{{mcp_servers}}"
+                  },
+                  {
+                    "key": "Mcp-Session-Id",
+                    "value": "{{mcp_session_id}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": 3,\n  \"method\": \"tools/call\",\n  \"params\": {\n    \"name\": \"kagent_tools-k8s_get_resources\",\n    \"arguments\": {\n      \"resource_type\": \"nodes\",\n      \"output\": \"wide\"\n    }\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/mcp/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "mcp",
+                    ""
+                  ]
+                },
+                "description": "A real tool call through the whole chain: Postman -> LiteLLM -> kagent-tools Service -> Kubernetes API. Note the '<alias>-' prefix on the tool name."
+              }
+            },
+            {
+              "name": "5 · tools/list (REST, no session dance)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('HTTP 2xx', () => pm.response.to.be.success);"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/mcp-rest/tools/list?server_id={{mcp_server_id}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "mcp-rest",
+                    "tools",
+                    "list"
+                  ],
+                  "query": [
+                    {
+                      "key": "server_id",
+                      "value": "{{mcp_server_id}}"
+                    }
+                  ]
+                },
+                "description": "The convenience REST mirror of tools/list — plain GET, no initialize/session headers needed. Handy for quick checks and dashboards."
+              }
+            },
+            {
+              "name": "6 · tools/list (REST, all servers)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('HTTP 2xx', () => pm.response.to.be.success);"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/mcp-rest/tools/list",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "mcp-rest",
+                    "tools",
+                    "list"
+                  ]
+                },
+                "description": "REST mirror of tools/list across every registered server."
+              }
+            },
+            {
+              "name": "7 · tools/call · a tool hidden by allowed_tools (expect refusal)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json, text/event-stream"
+                  },
+                  {
+                    "key": "Mcp-Session-Id",
+                    "value": "{{mcp_session_id}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/mcp/",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "mcp"
+                  ]
+                },
+                "description": "k8s_delete_resource exists on the upstream server but is not in allowed_tools. The gateway answers isError: true, \"Tool k8s_delete_resource is not allowed for server kagent_tools\".",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": 4,\n  \"method\": \"tools/call\",\n  \"params\": {\n    \"name\": \"kagent_tools-k8s_delete_resource\",\n    \"arguments\": {\n      \"resource_type\": \"pod\",\n      \"resource_name\": \"x\",\n      \"namespace\": \"default\"\n    }\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('HTTP 2xx', () => pm.response.to.be.success);"
+                    ]
+                  }
+                }
+              ]
+            }
+          ],
+          "description": "Use the localhost port-forward and a LiteLLM key. See docs/setup-guide.md.",
+          "auth": {
+            "type": "bearer",
+            "bearer": [
+              {
+                "key": "token",
+                "value": "{{litellm_api_key}}",
+                "type": "string"
+              }
+            ]
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// LiteLLM's /mcp/ endpoint reads x-litellm-api-key BEFORE Authorization and rejects a bare key",
+                  "// ('Ensure Key has Bearer prefix'). Drop the header the collection script added; the folder auth",
+                  "// sends the key as Authorization: Bearer, which is what this endpoint wants (and what routes it).",
+                  "pm.request.headers.remove('x-litellm-api-key');"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Use · per-server mounts (/{server_name}/mcp)",
+          "item": [
+            {
+              "name": "kmcp_everything · tools/list",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json, text/event-stream"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/kmcp_everything/mcp",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "kmcp_everything",
+                    "mcp"
+                  ]
+                },
+                "description": "One server through its own mount, /{server_name}/mcp.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": 2,\n  \"method\": \"tools/list\",\n  \"params\": {}\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('HTTP 2xx', () => pm.response.to.be.success);"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "kmcp_everything · tools/call echo",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json, text/event-stream"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/kmcp_everything/mcp",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "kmcp_everything",
+                    "mcp"
+                  ]
+                },
+                "description": "Calls the stdio MCP server that kmcp runs behind agentgateway.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": 5,\n  \"method\": \"tools/call\",\n  \"params\": {\n    \"name\": \"kmcp_everything-echo\",\n    \"arguments\": {\n      \"message\": \"hello from kmcp via LiteLLM\"\n    }\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('HTTP 2xx', () => pm.response.to.be.success);"
+                    ]
+                  }
+                }
+              ]
+            }
+          ],
+          "description": "Each registered server is also mounted alone at `/{server_name}/mcp`: plain MCP JSON-RPC against just that server, no `x-mcp-servers` header. These examples drive `kmcp_everything`, the server kmcp deploys. `Accept` must include `text/event-stream`."
+        },
+        {
+          "name": "Use · inside chat completions",
+          "item": [
+            {
+              "name": "Chat Completion — MCP: list nodes",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/v1/chat/completions",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "chat",
+                    "completions"
+                  ]
+                },
+                "description": "MCP inside a chat completion: with require_approval 'never' the proxy lists the server's tools, executes the model's tool calls and makes one follow-up model call. Needs a registered model.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"model\": \"gpt-5.6-sol\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"You are a read-only Kubernetes assistant. Use the available tools and answer only from tool results.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"How many nodes does the cluster have and which Kubernetes version do they run?\"\n    }\n  ],\n  \"tools\": [\n    {\n      \"type\": \"mcp\",\n      \"server_url\": \"litellm_proxy/mcp/kagent_tools\",\n      \"require_approval\": \"never\"\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('HTTP 2xx', () => pm.response.to.be.success);"
+                    ]
+                  }
+                }
+              ]
+            }
+          ],
+          "description": "POST `/v1/chat/completions` with `tools: [{type: 'mcp', server_url: 'litellm_proxy', require_approval: 'never'}]` — the proxy exposes every registered MCP tool to the model and executes tool calls server-side, looping until the model answers. Scope with `x-mcp-servers` header if you want fewer servers in play."
+        }
+      ],
+      "description": "Optional MCP examples. Deploy an MCPServer through kmcp, then register its internal service URL in LiteLLM before using these requests."
+    },
+    {
+      "name": "5 · A2A Agents",
+      "item": [
+        {
+          "name": "Manage registrations (/v1/agents)",
+          "item": [
+            {
+              "name": "1 · list agents",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const body = pm.response.json();",
+                      "const agents = Array.isArray(body) ? body : (body.agents || []);",
+                      "agents.forEach(a => console.log(a.agent_name, '->', a.agent_id));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/v1/agents",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "agents"
+                  ]
+                },
+                "description": "All registered agents. Optional query params: ?filter_reachable=true probes each agent's URL and drops unreachable ones; ?task=... ranks agents by semantic similarity over name/description/skills (needs agent_search_embedding_model configured)."
+              }
+            },
+            {
+              "name": "2 · create agent (register a card)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('HTTP 2xx', () => pm.response.to.be.success);",
+                      "pm.collectionVariables.set('agent_id', pm.response.json().agent_id);"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"agent_name\": \"cluster_agent\",\n  \"agent_card_params\": {\n    \"protocolVersion\": \"1.0\",\n    \"name\": \"cluster_agent\",\n    \"description\": \"Read-only Kubernetes assistant that answers questions about this EKS cluster.\",\n    \"url\": \"http://kagent-controller.kagent.svc.cluster.local:8083/api/a2a/kagent/cluster-agent/\",\n    \"version\": \"1.0.0\",\n    \"defaultInputModes\": [\n      \"text\"\n    ],\n    \"defaultOutputModes\": [\n      \"text\"\n    ],\n    \"capabilities\": {\n      \"streaming\": true\n    },\n    \"skills\": [\n      {\n        \"description\": \"Answers questions about workloads, nodes, events, logs and Helm releases in the cluster.\",\n        \"examples\": [\n          \"How many nodes does the cluster have and what version are they running?\",\n          \"Which pods are not Running, and why?\",\n          \"Which Helm releases are installed?\"\n        ],\n        \"id\": \"cluster-questions\",\n        \"name\": \"Cluster questions\",\n        \"tags\": [\n          \"kubernetes\",\n          \"eks\",\n          \"read-only\"\n        ]\n      }\n    ]\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/v1/agents",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "agents"
+                  ]
+                },
+                "description": "Registers the kagent agent. The fields come from the card kagent serves at http://kagent-controller.kagent.svc.cluster.local:8083/api/a2a/kagent/cluster-agent/.well-known/agent-card.json. The url must be reachable from the LiteLLM pod."
+              }
+            },
+            {
+              "name": "3 · get one agent",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('HTTP 2xx', () => pm.response.to.be.success);"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/v1/agents/{{agent_id}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "agents",
+                    "{{agent_id}}"
+                  ]
+                },
+                "description": "Fetch one registered agent by id — returns the stored agent card and its metadata."
+              }
+            },
+            {
+              "name": "4 · delete an agent",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('HTTP 2xx', () => pm.response.to.be.success);"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/v1/agents/{{agent_id}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "agents",
+                    "{{agent_id}}"
+                  ]
+                },
+                "description": "Unregisters from the gateway only — the kagent agent itself keeps running."
+              }
+            }
+          ],
+          "description": "The beta agent registry. An agent is registered by submitting its A2A agent card; LiteLLM then proxies it at /a2a/{agent_id}. Our four kagent agents were registered by fetching each card from kagent-controller (/api/a2a/kagent/<name>/.well-known/agent-card.json) and submitting it verbatim as agent_card_params."
+        },
+        {
+          "name": "Invoke through the gateway (/a2a/{agent_id})",
+          "item": [
+            {
+              "name": "1 · agent card via gateway",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('HTTP 2xx', () => pm.response.to.be.success);"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/a2a/{{agent_id}}/.well-known/agent-card.json",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "a2a",
+                    "{{agent_id}}",
+                    ".well-known",
+                    "agent-card.json"
+                  ]
+                },
+                "description": "The same discovery contract as kagent serves, now via one gateway URL per agent."
+              }
+            },
+            {
+              "name": "2 · message/send via gateway",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const task = (pm.response.json().result || {}).task || {};",
+                      "pm.test('task completed', () => pm.expect(task.status?.state).to.eql('TASK_STATE_COMPLETED'));",
+                      "const texts = (task.artifacts || []).flatMap(a => a.parts || []).filter(p => p.text).map(p => p.text);",
+                      "console.log('ANSWER:\\n' + (texts.at(-1) || '(no text artifact)'));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": \"1\",\n  \"method\": \"message/send\",\n  \"params\": {\n    \"message\": {\n      \"role\": \"user\",\n      \"kind\": \"message\",\n      \"messageId\": \"{{$guid}}\",\n      \"parts\": [\n        {\n          \"kind\": \"text\",\n          \"text\": \"How many nodes does this cluster have, and which Kubernetes version do they run?\"\n        }\n      ]\n    }\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/a2a/{{agent_id}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "a2a",
+                    "{{agent_id}}"
+                  ]
+                },
+                "description": "One JSON-RPC call; behind it kagent runs the agent's tool loop, with the model and the tools both reached through this gateway. {{agent_id}} may be the agent id or its name (cluster_agent)."
+              }
+            }
+          ],
+          "description": "LiteLLM proxies each registered agent's A2A surface. RESPONSE SHAPE: unlike calling kagent directly, the gateway nests the reply under result.task — state at result.task.status.state (TASK_STATE_COMPLETED) and the answer text at result.task.artifacts[].parts[].text. Agents run multi-round tool loops on GPT-5.6 Sol: allow 30-180s (raise Postman's request timeout).\n\nAUTH: public via the key-only route (either header form). Port-forward: identical."
+        }
+      ],
+      "description": "Optional A2A examples. Create a kagent Agent first, then register its reachable agent-card URL with LiteLLM."
+    },
+    {
+      "name": "6 · Keys, spend, teams & users (optional)",
+      "item": [
+        {
+          "name": "1 · generate a scoped virtual key",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 2xx', () => pm.response.to.be.success);",
+                  "const r = pm.response.json();",
+                  "pm.test('key returned', () => pm.expect(r.key).to.match(/^sk-/));",
+                  "pm.collectionVariables.set('virtual_key', r.key);",
+                  "pm.collectionVariables.set('virtual_key_hash', r.token_id || r.token || '');",
+                  "console.log('virtual_key saved; hash:', r.token_id || r.token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"key_alias\": \"postman-{{$timestamp}}\",\n  \"models\": [\n    \"gpt-5.6-sol\"\n  ],\n  \"max_budget\": 1.0,\n  \"duration\": \"1d\",\n  \"rpm_limit\": 60,\n  \"metadata\": {\n    \"created_by\": \"postman\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/key/generate",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "key",
+                "generate"
+              ]
+            },
+            "description": "Creates a virtual key limited to two models, USD 1 budget, 60 requests/min, expiring in a day. The raw key (`key`) is returned once; `token_id` is its hash, which is what spend logs are indexed by."
+          }
+        },
+        {
+          "name": "2 · key info",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 2xx', () => pm.response.to.be.success);",
+                  "const r = pm.response.json();",
+                  "pm.test('info returned', () => pm.expect(r.info).to.be.an('object'));",
+                  "console.log('models:', r.info.models, '| max_budget:', r.info.max_budget, '| spend:', r.info.spend);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/key/info?key={{virtual_key}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "key",
+                "info"
+              ],
+              "query": [
+                {
+                  "key": "key",
+                  "value": "{{virtual_key}}"
+                }
+              ]
+            },
+            "description": "Reads the key's alias, allowed models, budget, spend so far and expiry."
+          }
+        },
+        {
+          "name": "3 · use the virtual key on an ALLOWED model (/v1)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 2xx', () => pm.response.to.be.success);",
+                  "console.log(pm.response.json().choices[0].message.content);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"model\": \"gpt-5.6-sol\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"Say ok.\"\n    }\n  ],\n  \"max_tokens\": 10\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/chat/completions",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "v1",
+                "chat",
+                "completions"
+              ]
+            },
+            "description": "Use this request through the localhost LiteLLM port-forward. See docs/setup-guide.md.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{virtual_key}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "4 · virtual key on a model OUTSIDE its list (expect refusal)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('refused by LiteLLM (4xx)', () => pm.expect([400, 401, 403]).to.include(pm.response.code));",
+                  "console.log(JSON.stringify(pm.response.json()).slice(0, 200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"model\": \"claude-opus-4-5\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"Say ok.\"\n    }\n  ],\n  \"max_tokens\": 10\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/chat/completions",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "v1",
+                "chat",
+                "completions"
+              ]
+            },
+            "description": "Same key, a model it is not scoped to. LiteLLM refuses before any provider is called: this is the scope enforcement the virtual-key model exists for.",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{virtual_key}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "5 · spend logs for the virtual key",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 2xx', () => pm.response.to.be.success);",
+                  "const r = pm.response.json();",
+                  "pm.test('array of log rows', () => pm.expect(r).to.be.an('array'));",
+                  "console.log('rows:', r.length, r[0] ? `first: ${r[0].model} $${r[0].spend}` : '');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/spend/logs?api_key={{virtual_key_hash}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "spend",
+                "logs"
+              ],
+              "query": [
+                {
+                  "key": "api_key",
+                  "value": "{{virtual_key_hash}}"
+                }
+              ]
+            },
+            "description": "Per-request spend rows (model, tokens, cost) for the key created in step 1, looked up by its hash. Expect at least the one call from step 3."
+          }
+        },
+        {
+          "name": "6 · update the key (raise budget)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 2xx', () => pm.response.to.be.success);",
+                  "console.log('max_budget now', pm.response.json().max_budget);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"key\": \"{{virtual_key}}\",\n  \"max_budget\": 2.0\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/key/update",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "key",
+                "update"
+              ]
+            },
+            "description": "Budgets, models, limits and expiry can all be changed in place without re-issuing the key."
+          }
+        },
+        {
+          "name": "7 · list keys",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 2xx', () => pm.response.to.be.success);",
+                  "const r = pm.response.json();",
+                  "console.log('keys:', (r.keys || []).length, 'total:', r.total_count);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/key/list?return_full_object=true&size=20",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "key",
+                "list"
+              ],
+              "query": [
+                {
+                  "key": "return_full_object",
+                  "value": "true"
+                },
+                {
+                  "key": "size",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "All keys the master key can see; find `postman-…` among them. `return_full_object` includes alias, models and spend."
+          }
+        },
+        {
+          "name": "8 · spend logs, all keys (last 7 days)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const d = new Date(); const end = d.toISOString().slice(0,10); d.setDate(d.getDate()-7); const start = d.toISOString().slice(0,10);",
+                  "pm.variables.set('spend_start', start); pm.variables.set('spend_end', end);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 2xx', () => pm.response.to.be.success);",
+                  "const r = pm.response.json(); pm.test('array of rows', () => pm.expect(r).to.be.an('array'));",
+                  "console.log('rows:', r.length);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/spend/logs?start_date={{spend_start}}&end_date={{spend_end}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "spend",
+                "logs"
+              ],
+              "query": [
+                {
+                  "key": "start_date",
+                  "value": "{{spend_start}}"
+                },
+                {
+                  "key": "end_date",
+                  "value": "{{spend_end}}"
+                }
+              ]
+            },
+            "description": "Per-request spend rows for every key in a date window (dates set by this request's pre-request script). `/global/spend/report` exists but is LiteLLM Enterprise-only (400 without a license), so the open-source `/spend/logs` is used."
+          }
+        },
+        {
+          "name": "9 · delete the virtual key",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 2xx', () => pm.response.to.be.success);",
+                  "pm.collectionVariables.set('virtual_key', ''); pm.collectionVariables.set('virtual_key_hash', '');",
+                  "console.log('deleted:', JSON.stringify(pm.response.json()).slice(0, 120));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"keys\": [\n    \"{{virtual_key}}\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/key/delete",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "key",
+                "delete"
+              ]
+            },
+            "description": "Revocation is immediate; step 3 would now return 401. Clears the captured variables."
+          }
+        },
+        {
+          "name": "10 · teams",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 2xx', () => pm.response.to.be.success);",
+                  "console.log('teams:', pm.response.json().length);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/team/list",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "team",
+                "list"
+              ]
+            },
+            "description": "Teams (budgets and model lists shared by their members' keys). Empty on a single-user proxy."
+          }
+        },
+        {
+          "name": "11 · users",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 2xx', () => pm.response.to.be.success);",
+                  "const r = pm.response.json(); console.log('users:', (r.users || r).length);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/user/list?page_size=20",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "user",
+                "list"
+              ],
+              "query": [
+                {
+                  "key": "page_size",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Internal users known to the proxy (dashboard logins and key owners)."
+          }
+        },
+        {
+          "name": "12 · user info (caller)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 2xx', () => pm.response.to.be.success);",
+                  "console.log(JSON.stringify(pm.response.json()).slice(0, 200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/user/info",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "user",
+                "info"
+              ]
+            },
+            "description": "Who the proxy thinks the caller is, with the keys and teams attached to that identity."
+          }
+        }
+      ],
+      "description": "Use the localhost port-forward and a LiteLLM key. See docs/setup-guide.md."
+    },
+    {
+      "name": "7 · Local authentication checks",
+      "item": [
+        {
+          "name": "1 · liveness responds without credentials",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/health/liveliness",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "health",
+                "liveliness"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('liveness 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "2 · management without a key is rejected",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/model/info",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "model",
+                "info"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('missing key rejected', () => pm.expect([401,403]).to.include(pm.response.code));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "3 · bogus key is rejected",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/model/info",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "model",
+                "info"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "sk-invalid-for-test",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('bogus key rejected', () => pm.expect([401,403]).to.include(pm.response.code));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "4 · master key can list models",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/model/info",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "model",
+                "info"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('master key accepted', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "description": "Check LiteLLM authentication directly through localhost port forwarding."
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{litellm_api_key}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://127.0.0.1:4000",
+      "description": "Local LiteLLM port-forward address."
+    },
+    {
+      "key": "litellm_api_key",
+      "value": "",
+      "description": "LiteLLM sk- key sent as x-litellm-api-key. Must be the master key for the Model Management folder.",
+      "type": "secret"
+    },
+    {
+      "key": "model_id",
+      "value": "",
+      "description": "Set by Add Model; used by Update/Delete Model."
+    },
+    {
+      "key": "mcp_servers",
+      "value": "",
+      "description": "comma-separated server_names for the x-mcp-servers scoping header"
+    },
+    {
+      "key": "mcp_session_id",
+      "value": "",
+      "description": "Mcp-Session-Id captured by the /mcp/ initialize request"
+    },
+    {
+      "key": "mcp_server_id",
+      "value": "",
+      "description": "server_id of one registered MCP server (from list/create)"
+    },
+    {
+      "key": "agent_id",
+      "value": "",
+      "description": "registered A2A agent id or name (cluster_agent)"
+    },
+    {
+      "key": "virtual_key",
+      "value": ""
+    },
+    {
+      "key": "virtual_key_hash",
+      "value": ""
+    },
+    {
+      "key": "spend_start",
+      "value": ""
+    },
+    {
+      "key": "spend_end",
+      "value": ""
+    },
+    {
+      "key": "mcp_mount_name",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}
