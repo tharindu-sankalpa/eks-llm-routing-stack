@@ -1,0 +1,16 @@
+# kagent model "grok-4-7", served through the LiteLLM gateway.
+# "model" is the LiteLLM model_name (LiteLLM maps it to openrouter/x-ai/grok-4.7).
+# This config uses its own virtual key: the key is limited in LiteLLM to the
+# model grok-4.7 and the MCP server kmcp_everything, with a 5 USD budget.
+apiVersion: kagent.dev/v1alpha2
+kind: ModelConfig
+metadata:
+  name: grok-4-7
+  namespace: kagent
+spec:
+  provider: OpenAI # LiteLLM speaks the OpenAI API
+  model: grok-4.7
+  apiKeySecret: everything-agent-litellm # LiteLLM virtual key, not a provider key
+  apiKeySecretKey: LITELLM_API_KEY
+  openAI:
+    baseUrl: http://litellm.litellm.svc.cluster.local:4000/v1

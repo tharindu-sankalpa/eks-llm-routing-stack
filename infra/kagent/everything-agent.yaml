@@ -1,0 +1,65 @@
+# A second agent. It uses a different model (grok-4.7) and a different tool
+# server (the "everything" MCP server that kmcp runs), both through LiteLLM.
+#
+# The RemoteMCPServer is the same LiteLLM /mcp/ URL as litellm-mcp-gateway, but
+# with this agent's own virtual key. LiteLLM decides what that key can see, so
+# kagent discovers only the kmcp_everything tools here.
+apiVersion: kagent.dev/v1alpha2
+kind: RemoteMCPServer
+metadata:
+  name: litellm-mcp-everything
+  namespace: kagent
+spec:
+  description: LiteLLM MCP gateway, as seen by the everything-agent key
+  protocol: STREAMABLE_HTTP
+  url: http://litellm.litellm.svc.cluster.local:4000/mcp/
+  timeout: 60s
+  sseReadTimeout: 5m0s
+  headersFrom:
+    - name: x-litellm-api-key
+      valueFrom:
+        type: Secret
+        name: everything-agent-litellm
+        key: LITELLM_API_KEY
+---
+apiVersion: kagent.dev/v1alpha2
+kind: Agent
+metadata:
+  name: everything-agent
+  namespace: kagent
+spec:
+  description: Demo agent that uses the MCP reference test server deployed by kmcp.
+  type: Declarative
+  declarative:
+    modelConfig: grok-4-7
+    systemMessage: |
+      You are a demo agent for the MCP reference test server.
+
+      Rules:
+      - Use a tool for every request that a tool can fulfil. Do not compute
+        sums or produce echoes yourself.
+      - After a tool call, report the tool's result exactly, and name the tool
+        you used.
+      - If no tool fits the request, say so in one sentence.
+    tools:
+      - type: McpServer
+        mcpServer:
+          apiGroup: kagent.dev
+          kind: RemoteMCPServer
+          name: litellm-mcp-everything
+          toolNames:
+            - kmcp_everything-echo
+            - kmcp_everything-get-sum
+            - kmcp_everything-get-structured-content
+            - kmcp_everything-get-annotated-message
+    a2aConfig:
+      skills:
+        - id: mcp-demo
+          name: MCP demo tools
+          description: Echoes text and adds numbers using the MCP reference test server.
+          tags:
+            - mcp
+            - demo
+          examples:
+            - "Add 1234.5 and 8765.5."
+            - "Echo the text: hello from kmcp."

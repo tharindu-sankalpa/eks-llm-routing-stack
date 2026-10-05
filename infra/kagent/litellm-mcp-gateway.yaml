@@ -1,0 +1,23 @@
+# Tells kagent about the LiteLLM MCP gateway.
+# The agent does not talk to kagent-tools directly. Its tool calls go to
+# LiteLLM, which checks the virtual key, applies the allowed_tools filter and
+# logs the call, then forwards to the real server.
+apiVersion: kagent.dev/v1alpha2
+kind: RemoteMCPServer
+metadata:
+  name: litellm-mcp-gateway
+  namespace: kagent
+spec:
+  description: LiteLLM MCP gateway (aggregates the MCP servers registered in LiteLLM)
+  protocol: STREAMABLE_HTTP
+  url: http://litellm.litellm.svc.cluster.local:4000/mcp/
+  timeout: 60s
+  sseReadTimeout: 5m0s
+  headersFrom:
+    # LiteLLM virtual key (not a provider key). The key's object_permission
+    # limits it to the kagent_tools server.
+    - name: x-litellm-api-key
+      valueFrom:
+        type: Secret
+        name: kagent-litellm
+        key: LITELLM_API_KEY

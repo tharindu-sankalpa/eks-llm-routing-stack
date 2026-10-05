@@ -1,0 +1,40 @@
+# Helm values for kagent (chart: oci://ghcr.io/kagent-dev/kagent/helm/kagent, version 0.9.10).
+# The chart bundles kmcp 0.3.0 (kmcp.enabled defaults to true) and the
+# kagent-tools MCP server 0.2.1.
+
+# kagent gets its LLM from the LiteLLM gateway, not from a provider.
+# The chart renders this block as the ModelConfig "default-model-config":
+#   spec.provider: OpenAI          (LiteLLM speaks the OpenAI API)
+#   spec.openAI.baseUrl            (the in-cluster LiteLLM Service)
+#   spec.apiKeySecret / Key        (a LiteLLM virtual key, created with /key/generate)
+providers:
+  default: openAI
+  openAI:
+    provider: OpenAI
+    # Must equal a model_name registered in LiteLLM with POST /model/new.
+    model: gpt-5.6-sol
+    apiKeySecretRef: kagent-litellm
+    apiKeySecretKey: LITELLM_API_KEY
+    config:
+      baseUrl: http://litellm.litellm.svc.cluster.local:4000/v1
+
+# Built-in MCP servers.
+kagent-tools:
+  enabled: true # Kubernetes, Helm, Istio, Cilium, Argo and Prometheus tools on :8084/mcp
+querydoc:
+  enabled: true # documentation search MCP server
+grafana-mcp:
+  enabled: false # needs a Grafana instance; none in this cluster
+
+# The ten pre-built agents are switched off. This build defines its own agent
+# (infra/kagent/cluster-agent.yaml) so the Agent resource is visible end to end.
+k8s-agent: { enabled: false }
+kgateway-agent: { enabled: false }
+istio-agent: { enabled: false }
+promql-agent: { enabled: false }
+observability-agent: { enabled: false }
+argo-rollouts-agent: { enabled: false }
+helm-agent: { enabled: false }
+cilium-policy-agent: { enabled: false }
+cilium-manager-agent: { enabled: false }
+cilium-debug-agent: { enabled: false }

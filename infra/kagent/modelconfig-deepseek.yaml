@@ -1,0 +1,15 @@
+# A second kagent model, also served through the LiteLLM gateway.
+# "model" is the LiteLLM model_name. LiteLLM maps it to
+# openrouter/deepseek/deepseek-v4.1-flash and holds the OpenRouter key.
+apiVersion: kagent.dev/v1alpha2
+kind: ModelConfig
+metadata:
+  name: deepseek-v4-1-flash
+  namespace: kagent
+spec:
+  provider: OpenAI # LiteLLM speaks the OpenAI API
+  model: deepseek-v4.1-flash
+  apiKeySecret: kagent-litellm # LiteLLM virtual key, not a provider key
+  apiKeySecretKey: LITELLM_API_KEY
+  openAI:
+    baseUrl: http://litellm.litellm.svc.cluster.local:4000/v1

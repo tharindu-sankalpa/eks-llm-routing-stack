@@ -1,0 +1,19 @@
+# An MCP server deployed by kmcp.
+# kmcp ships no MCP servers of its own; it runs the ones you describe.
+# This one is the MCP reference test server, a public npm package that needs
+# no API key and no image build.
+apiVersion: kagent.dev/v1alpha1
+kind: MCPServer
+metadata:
+  name: everything
+  namespace: kagent
+spec:
+  transportType: stdio # the package speaks MCP over stdin/stdout
+  stdioTransport: {}
+  deployment:
+    # No image: for cmd "npx" the kmcp controller defaults to node:24-alpine3.21.
+    cmd: npx
+    args:
+      - "-y"
+      - "@modelcontextprotocol/server-everything"
+    port: 3000 # kmcp puts agentgateway in the pod to serve stdio as HTTP on :3000/mcp

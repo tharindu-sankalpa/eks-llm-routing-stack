@@ -1,0 +1,56 @@
+# A kagent declarative agent that answers questions about this cluster.
+#   model : ModelConfig deepseek-v4-1-flash -> LiteLLM /v1/chat/completions
+#   tools : RemoteMCPServer litellm-mcp-gateway -> LiteLLM /mcp/ -> kagent-tools
+apiVersion: kagent.dev/v1alpha2
+kind: Agent
+metadata:
+  name: cluster-agent
+  namespace: kagent
+spec:
+  description: Read-only Kubernetes assistant that answers questions about this EKS cluster.
+  type: Declarative
+  declarative:
+    modelConfig: deepseek-v4-1-flash
+    systemMessage: |
+      You are a read-only Kubernetes assistant for one Amazon EKS cluster.
+
+      Rules:
+      - Answer only from tool results. Call a tool before you state any fact
+        about the cluster. Never guess names, counts or versions.
+      - You cannot change the cluster. If asked to create, modify or delete
+        something, say that your tools are read-only.
+      - Prefer k8s_get_resources with the exact resource type and, where it
+        helps, output "wide". Use k8s_describe_resource, k8s_get_events and
+        k8s_get_pod_logs to explain why something is unhealthy.
+      - Keep answers short. Use a table for lists of resources.
+    tools:
+      - type: McpServer
+        mcpServer:
+          apiGroup: kagent.dev
+          kind: RemoteMCPServer
+          name: litellm-mcp-gateway
+          # Names carry the LiteLLM prefix "<server alias>-".
+          toolNames:
+            - kagent_tools-k8s_get_resources
+            - kagent_tools-k8s_describe_resource
+            - kagent_tools-k8s_get_events
+            - kagent_tools-k8s_get_pod_logs
+            - kagent_tools-k8s_get_resource_yaml
+            - kagent_tools-k8s_get_available_api_resources
+            - kagent_tools-k8s_get_cluster_configuration
+            - kagent_tools-helm_list_releases
+            - kagent_tools-helm_get_release
+            - kagent_tools-datetime_get_current_time
+    a2aConfig:
+      skills:
+        - id: cluster-questions
+          name: Cluster questions
+          description: Answers questions about workloads, nodes, events, logs and Helm releases in the cluster.
+          tags:
+            - kubernetes
+            - eks
+            - read-only
+          examples:
+            - "How many nodes does the cluster have and what version are they running?"
+            - "Which pods are not Running, and why?"
+            - "Which Helm releases are installed?"
